@@ -1,30 +1,28 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import * as React from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { useTheme } from "next-themes"
-
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/contexts/auth-context"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import Link from "next/link"
 
 const formSchema = z.object({
   email: z.string().email({
     message: "Email inválido",
   }),
-  password: z.string().min(6, {
-    message: "Mínimo 6 caracteres",
+  password: z.string().min(1, {
+    message: "La contraseña es requerida",
   }),
 })
 
 export function LoginForm() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const { setTheme } = useTheme()
+  const { login, isLoading } = useAuth()
+  const [formError, setFormError] = React.useState<string | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,53 +32,25 @@ export function LoginForm() {
     },
   })
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-
-    // Simular autenticación
-    setTimeout(() => {
-      // Determinar automáticamente el rol basado en el email
-      // Modificado: Ahora detecta "company" en cualquier parte del email
-      const isCompany = values.email.toLowerCase().includes("company")
-      const role = isCompany ? "company" : "agent"
-
-      console.log("Role detected:", role) // Para depuración
-
-      // Establecer el tema según el rol determinado
-      if (role === "company") {
-        setTheme("light") // Tema claro para compañías
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setFormError(null)
+    try {
+      await login(values)
+    } catch (error) {
+      console.error("Login error:", error)
+      if (error instanceof Error) {
+        setFormError(error.message)
       } else {
-        setTheme("system") // Tema del sistema para agentes
+        setFormError("Ocurrió un error al iniciar sesión")
       }
-
-      // Crear un objeto con los datos del usuario
-      const userData = {
-        email: values.email,
-        role: role,
-        name: role === "company" ? "Empresa ABC" : "Juan Pérez",
-        theme: role === "company" ? "light" : "system",
-      }
-
-      // Guardar en una cookie
-      document.cookie = `auth=${JSON.stringify(userData)}; path=/; max-age=86400`
-
-      // Redirigir según el rol
-      if (role === "company") {
-        console.log("Redirecting to company dashboard") // Para depuración
-        router.push("/dashboard-company/dashboard")
-      } else {
-        console.log("Redirecting to agent dashboard") // Para depuración
-        router.push("/dashboard-agent/dashboard")
-      }
-
-      setIsLoading(false)
-    }, 1000)
+    }
   }
 
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>Iniciar Sesión</CardTitle>
+        <CardTitle>Iniciar sesión</CardTitle>
+        <CardDescription>Ingresa tus credenciales para acceder a tu cuenta</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -105,17 +75,24 @@ export function LoginForm() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••" {...field} />
+                    <Input type="password" placeholder="••••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            {formError && <div className="text-sm font-medium text-destructive">{formError}</div>}
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
+              {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
             </Button>
           </form>
         </Form>
+        <div className="mt-4 text-center text-sm">
+          ¿No tienes una cuenta?{" "}
+          <Link href="/auth/register" className="font-medium text-primary hover:underline">
+            Regístrate
+          </Link>
+        </div>
       </CardContent>
     </Card>
   )

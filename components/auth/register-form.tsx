@@ -1,7 +1,5 @@
 "use client"
-
-import * as React from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
@@ -9,9 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { useToast } from "@/hooks/use-toast"
-import { useTheme } from "next-themes"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useAuth } from "@/contexts/auth-context"
+import type { UserRole } from "@/types/auth"
+import { useState } from "react"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -29,13 +28,11 @@ const formSchema = z.object({
 })
 
 export function RegisterForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const { toast } = useToast()
-  const [isLoading, setIsLoading] = React.useState(false)
-  const { setTheme } = useTheme()
+  const { register, isLoading } = useAuth()
+  const [formError, setFormError] = useState<string | null>(null)
 
-  const defaultRole = searchParams.get("role") as "agent" | "company" | null
+  const defaultRole = searchParams.get("role") as UserRole | null
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,42 +45,18 @@ export function RegisterForm() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-
-      // Crear un objeto con los datos del usuario
-      const userData = {
-        email: values.email,
-        name: values.name,
-        role: values.role,
-        theme: values.role === "agent" ? "system" : "light", // Guardar preferencia de tema
-      }
-
-      // Guardar en una cookie
-      document.cookie = `auth=${JSON.stringify(userData)}; path=/; max-age=86400`
-
-      // Establecer el tema según el rol
-      if (values.role === "agent") {
-        setTheme("system") // Usar el tema del sistema para agentes
+    setFormError(null)
+    try {
+      await register(values)
+    } catch (error) {
+      // El error ya se maneja en el contexto de autenticación
+      console.error("Register error:", error)
+      if (error instanceof Error) {
+        setFormError(error.message)
       } else {
-        setTheme("light") // Tema claro para compañías
+        setFormError("Ocurrió un error al registrarse")
       }
-
-      toast({
-        title: "Cuenta creada",
-        description: "Tu cuenta ha sido creada exitosamente.",
-      })
-
-      // Redirigir según el rol
-      if (values.role === "agent") {
-        router.push("/dashboard-agent/dashboard")
-      } else {
-        router.push("/dashboard-company/dashboard")
-      }
-    }, 1000)
+    }
   }
 
   return (
@@ -163,6 +136,7 @@ export function RegisterForm() {
                 </FormItem>
               )}
             />
+            {formError && <div className="text-sm font-medium text-destructive">{formError}</div>}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creando cuenta..." : "Crear cuenta"}
             </Button>
