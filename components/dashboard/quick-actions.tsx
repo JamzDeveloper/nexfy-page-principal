@@ -7,11 +7,13 @@ import { BarChart, FileText, MessageSquare, PlusCircle, Search, Users } from "lu
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
+// Actualizar la interfaz QuickActionsProps para incluir la propiedad userRole
 interface QuickActionsProps {
   className?: string
+  userRole?: string // Añadir esta propiedad
 }
 
-export function QuickActions({ className }: QuickActionsProps) {
+export function QuickActions({ className, userRole }: QuickActionsProps) {
   const pathname = usePathname()
 
   // Determinar si estamos en el dashboard de agente o compañía

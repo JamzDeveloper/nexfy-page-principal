@@ -12,8 +12,7 @@ export function CompaniesTable() {
       id: 1,
       name: "TechCorp",
       position: "Enterprise Sales Representative",
-      startDate: "15 Enero, 2023",
-      endDate: "15 Enero, 2024",
+      Date: "15 Enero, 2023",
       totalSales: 120000,
       commission: 24000,
       commissionRate: "20%",
@@ -23,8 +22,7 @@ export function CompaniesTable() {
       id: 2,
       name: "GrowthTech",
       position: "Sales Development Representative",
-      startDate: "3 Marzo, 2023",
-      endDate: "3 Marzo, 2024",
+      Date: "15 Enero, 2023",
       totalSales: 85000,
       commission: 17000,
       commissionRate: "20%",
@@ -34,8 +32,7 @@ export function CompaniesTable() {
       id: 3,
       name: "Innovate Inc",
       position: "Regional Sales Manager",
-      startDate: "10 Noviembre, 2022",
-      endDate: "10 Noviembre, 2023",
+      Date: "15 Enero, 2023",
       totalSales: 210000,
       commission: 42000,
       commissionRate: "20%",
@@ -45,8 +42,7 @@ export function CompaniesTable() {
       id: 4,
       name: "GlobalSales Co",
       position: "Inside Sales Representative",
-      startDate: "22 Abril, 2023",
-      endDate: "22 Abril, 2024",
+      Date: "15 Enero, 2023",
       totalSales: 65000,
       commission: 13000,
       commissionRate: "20%",
@@ -57,8 +53,8 @@ export function CompaniesTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contratos Activos</CardTitle>
-        <CardDescription>Compañías con las que tienes contratos activos actualmente</CardDescription>
+        <CardTitle>Oportunidades</CardTitle>
+        <CardDescription>Oportunidades que tienes activas actualmente</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -66,7 +62,7 @@ export function CompaniesTable() {
             <TableRow>
               <TableHead>Compañía</TableHead>
               <TableHead>Posición</TableHead>
-              <TableHead>Periodo</TableHead>
+              <TableHead>Fecha</TableHead>
               <TableHead>Ventas Totales</TableHead>
               <TableHead>Comisión</TableHead>
               <TableHead>Estado</TableHead>
@@ -81,7 +77,7 @@ export function CompaniesTable() {
                 <TableCell>
                   <div className="flex items-center text-muted-foreground">
                     <Calendar className="mr-1 h-4 w-4" />
-                    {company.startDate} - {company.endDate}
+                    {company.Date}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -106,11 +102,6 @@ export function CompaniesTable() {
                         Ver Detalles
                       </Button>
                     </ContractDetailsDialog>
-                    <Link href={`/dashboard-agent/messages`}>
-                      <Button variant="ghost" size="sm">
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-                    </Link>
                   </div>
                 </TableCell>
               </TableRow>

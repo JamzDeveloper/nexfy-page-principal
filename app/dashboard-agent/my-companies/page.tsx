@@ -12,8 +12,8 @@ export default function MyCompaniesPage() {
 
       <Tabs defaultValue="active" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="active">Contratos Activos</TabsTrigger>
-          <TabsTrigger value="pending">Contratos Pendientes</TabsTrigger>
+          <TabsTrigger value="active">Oportunidades</TabsTrigger>
+          <TabsTrigger value="pending">Oportunidades Aplicadas  </TabsTrigger>
         </TabsList>
         <TabsContent value="active" className="space-y-4">
           <CompaniesTable />

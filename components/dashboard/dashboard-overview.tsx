@@ -28,10 +28,16 @@ export function DashboardOverview({ userRole = "agent" }: DashboardOverviewProps
       description: "Across all opportunities",
     },
     {
-      title: "Performance",
-      value: "+18%",
-      icon: BarChart3,
-      description: "Compared to last month",
+      title: "Retained Commissions",
+      value: "$1,200",
+      icon: DollarSign,
+      description: "Comisiones que aún se encuentran retenidas",
+    },
+    {
+      title: "Commissions Available",
+      value: "$3,200",
+      icon: DollarSign,
+      description: "Comisiones que ya se encuentran disponibles",
     },
   ]
 
@@ -65,7 +71,7 @@ export function DashboardOverview({ userRole = "agent" }: DashboardOverviewProps
   const stats = userRole === "agent" ? agentStats : companyStats
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
       {stats.map((stat) => (
         <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

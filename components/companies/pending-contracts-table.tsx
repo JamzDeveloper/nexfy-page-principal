@@ -12,8 +12,7 @@ export function PendingContractsTable() {
       id: 1,
       name: "SoftwareSolutions",
       position: "Senior Sales Executive",
-      proposedDate: "1 Junio, 2023",
-      proposedEndDate: "1 Junio, 2024",
+      fecha: "1 Junio, 2023",
       estimatedSales: 150000,
       commissionRate: "22%",
       status: "Negociación",
@@ -22,8 +21,7 @@ export function PendingContractsTable() {
       id: 2,
       name: "DataTech Inc",
       position: "Sales Team Lead",
-      proposedDate: "15 Junio, 2023",
-      proposedEndDate: "15 Junio, 2024",
+      fecha: "1 Junio, 2023",
       estimatedSales: 200000,
       commissionRate: "18%",
       status: "Revisión Legal",
@@ -32,8 +30,7 @@ export function PendingContractsTable() {
       id: 3,
       name: "CloudServices",
       position: "Account Executive",
-      proposedDate: "10 Julio, 2023",
-      proposedEndDate: "10 Julio, 2024",
+      fecha: "1 Junio, 2023",
       estimatedSales: 180000,
       commissionRate: "20%",
       status: "Pendiente de Firma",
@@ -43,8 +40,8 @@ export function PendingContractsTable() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Contratos Pendientes</CardTitle>
-        <CardDescription>Contratos en proceso de negociación o aprobación</CardDescription>
+        <CardTitle>Oportunidades aplicadas</CardTitle>
+        <CardDescription>Oportunidades a las cuales has aplicado</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -52,8 +49,8 @@ export function PendingContractsTable() {
             <TableRow>
               <TableHead>Compañía</TableHead>
               <TableHead>Posición</TableHead>
-              <TableHead>Periodo Propuesto</TableHead>
-              <TableHead>Ventas Estimadas</TableHead>
+              <TableHead>fecha</TableHead>
+              <TableHead>Ventas Promedio</TableHead>
               <TableHead>Comisión</TableHead>
               <TableHead>Estado</TableHead>
               <TableHead>Acciones</TableHead>
@@ -67,7 +64,7 @@ export function PendingContractsTable() {
                 <TableCell>
                   <div className="flex items-center text-muted-foreground">
                     <Calendar className="mr-1 h-4 w-4" />
-                    {contract.proposedDate} - {contract.proposedEndDate}
+                    {contract.fecha}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -87,11 +84,6 @@ export function PendingContractsTable() {
                         Ver Detalles
                       </Button>
                     </ContractDetailsDialog>
-                    <Link href={`/dashboard-agent/messages`}>
-                      <Button variant="ghost" size="sm">
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
-                    </Link>
                   </div>
                 </TableCell>
               </TableRow>
