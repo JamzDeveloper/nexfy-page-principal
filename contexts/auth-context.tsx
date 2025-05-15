@@ -32,15 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const currentUser = authService.getCurrentUser()
         setUser(currentUser)
-
-        // Establecer tema según el rol del usuario
-        if (currentUser) {
-          if (currentUser.role === "company") {
-            setTheme("light")
-          } else {
-            setTheme("system")
-          }
-        }
       } catch (error) {
         console.error("Error loading user:", error)
       } finally {
@@ -49,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     loadUser()
-  }, [setTheme])
+  }, [])
 
   // Función de login
   const login = async (credentials: LoginCredentials) => {

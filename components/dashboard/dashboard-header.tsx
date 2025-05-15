@@ -13,8 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Logo } from "@/components/ui/logo"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
+import { useAuth } from "@/contexts/auth-context"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 // Tipo para las notificaciones
 interface Notification {
@@ -31,52 +34,111 @@ interface DashboardHeaderProps {
 }
 
 export function DashboardHeader({ userRole, className = "" }: DashboardHeaderProps) {
-  const userName = userRole === "agent" ? "Agente" : "Compañía"
+  const { user } = useAuth()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
 
-  // Estado para las notificaciones
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: "1",
-      title: "New User Registration",
-      description: "John Smith has registered as an agent",
-      time: "5 minutes ago",
-      read: false,
-    },
-    {
-      id: "2",
-      title: "New Opportunity Created",
-      description: "Acme Corp added a new sales opportunity",
-      time: "1 hour ago",
-      read: false,
-    },
-    {
-      id: "3",
-      title: "Sale Confirmed",
-      description: "A new sale worth $5,200 has been confirmed",
-      time: "3 hours ago",
-      read: false,
-    },
-    {
-      id: "4",
-      title: "New Application",
-      description: "Sarah Johnson applied to Enterprise Software Sales",
-      time: "Yesterday",
-      read: false,
-    },
-  ])
+  // Cargar notificaciones
+  useEffect(() => {
+    const loadNotifications = () => {
+      const savedNotifications = localStorage.getItem("notifications")
+      if (savedNotifications) {
+        const parsedNotifications = JSON.parse(savedNotifications)
+        setNotifications(parsedNotifications)
+        setUnreadCount(parsedNotifications.filter((n: Notification) => !n.read).length)
+      } else {
+        // Si no hay notificaciones guardadas, crear algunas de ejemplo
+        const defaultNotifications: Notification[] = [
+          {
+            id: "1",
+            title: "Nueva Oportunidad Disponible",
+            description: "Se ha publicado una nueva oportunidad que coincide con tu perfil",
+            time: "Hace 5 minutos",
+            read: false,
+          },
+          {
+            id: "2",
+            title: "Solicitud Aceptada",
+            description: "Tu solicitud para la oportunidad 'Ventas B2B' ha sido aceptada",
+            time: "Hace 1 hora",
+            read: false,
+          },
+          {
+            id: "3",
+            title: "Nuevo Mensaje",
+            description: "Has recibido un nuevo mensaje de Empresa ABC",
+            time: "Hace 3 horas",
+            read: false,
+          },
+          {
+            id: "4",
+            title: "Recordatorio de Reunión",
+            description: "Tienes una reunión programada para mañana a las 10:00 AM",
+            time: "Ayer",
+            read: true,
+          },
+          {
+            id: "5",
+            title: "Actualización de Contrato",
+            description: "El contrato con Cliente XYZ ha sido actualizado",
+            time: "Hace 2 días",
+            read: true,
+          },
+        ]
+        localStorage.setItem("notifications", JSON.stringify(defaultNotifications))
+        setNotifications(defaultNotifications)
+        setUnreadCount(defaultNotifications.filter((n) => !n.read).length)
+      }
+    }
+
+    loadNotifications()
+
+    // Escuchar cambios en localStorage
+    window.addEventListener("storage", loadNotifications)
+
+    return () => {
+      window.removeEventListener("storage", loadNotifications)
+    }
+  }, [])
 
   // Función para marcar todas las notificaciones como leídas
   const markAllAsRead = () => {
-    setNotifications(
-      notifications.map((notification) => ({
-        ...notification,
-        read: true,
-      })),
-    )
+    const updatedNotifications = notifications.map((notification) => ({
+      ...notification,
+      read: true,
+    }))
+
+    setNotifications(updatedNotifications)
+    setUnreadCount(0)
+    localStorage.setItem("notifications", JSON.stringify(updatedNotifications))
+
+    // Disparar evento para que otros componentes se actualicen
+    window.dispatchEvent(new Event("storage"))
   }
 
-  // Contar notificaciones no leídas
-  const unreadCount = notifications.filter((n) => !n.read).length
+  // Función para marcar una notificación como leída
+  const markAsRead = (id: string) => {
+    const updatedNotifications = notifications.map((notification) =>
+      notification.id === id ? { ...notification, read: true } : notification,
+    )
+
+    setNotifications(updatedNotifications)
+    setUnreadCount(updatedNotifications.filter((n) => !n.read).length)
+    localStorage.setItem("notifications", JSON.stringify(updatedNotifications))
+
+    // Disparar evento para que otros componentes se actualicen
+    window.dispatchEvent(new Event("storage"))
+  }
+
+  // Obtener las iniciales del nombre del usuario
+  const getUserInitials = () => {
+    if (!user || !user.name) return userRole === "agent" ? "A" : "C"
+
+    const nameParts = user.name.split(" ")
+    if (nameParts.length === 1) return nameParts[0].charAt(0).toUpperCase()
+
+    return (nameParts[0].charAt(0) + nameParts[nameParts.length - 1].charAt(0)).toUpperCase()
+  }
 
   return (
     <header className={`w-full border-b bg-background ${className}`}>
@@ -109,31 +171,46 @@ export function DashboardHeader({ userRole, className = "" }: DashboardHeaderPro
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[280px] sm:w-80">
               <div className="flex items-center justify-between px-4 py-2">
-                <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-auto p-0 text-blue-600 text-xs font-medium"
-                  onClick={markAllAsRead}
-                >
-                  Mark all as read
-                </Button>
+                <DropdownMenuLabel className="p-0">Notificaciones</DropdownMenuLabel>
+                {unreadCount > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-auto p-0 text-blue-600 text-xs font-medium"
+                    onClick={markAllAsRead}
+                  >
+                    Marcar todas como leídas
+                  </Button>
+                )}
               </div>
               <DropdownMenuSeparator />
               <div className="max-h-80 overflow-y-auto">
-                {notifications.map((notification) => (
-                  <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3 cursor-default">
+                {notifications.slice(0, 5).map((notification) => (
+                  <DropdownMenuItem
+                    key={notification.id}
+                    className={cn(
+                      "flex flex-col items-start p-3 cursor-default",
+                      !notification.read ? "bg-blue-50 dark:bg-blue-900/20" : "",
+                    )}
+                    onClick={() => markAsRead(notification.id)}
+                  >
                     <div className="flex justify-between w-full">
-                      <span className="font-medium text-sm">{notification.title}</span>
+                      <span className={cn("font-medium text-sm", !notification.read ? "font-semibold" : "")}>
+                        {notification.title}
+                      </span>
                       <span className="text-xs text-muted-foreground">{notification.time}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{notification.description}</p>
                   </DropdownMenuItem>
                 ))}
+
+                {notifications.length === 0 && (
+                  <div className="py-4 text-center text-sm text-muted-foreground">No hay notificaciones</div>
+                )}
               </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="justify-center text-blue-600 font-medium" asChild>
-                <Link href={`/dashboard-${userRole}/notifications`}>View all notifications</Link>
+                <Link href={`/dashboard-${userRole}/notifications`}>Ver todas las notificaciones</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -141,10 +218,18 @@ export function DashboardHeader({ userRole, className = "" }: DashboardHeaderPro
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2 pl-2 pr-3">
-                <div className="relative h-8 w-8 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs">
-                  {userName.charAt(0)}
-                </div>
-                <span className="hidden md:inline-block text-sm font-medium">{userName} User</span>
+                {/*
+                <Avatar className="h-8 w-8">
+                  {user?.profileImage ? (
+                    <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name || "Usuario"} />
+                  ) : (
+                    <AvatarFallback className="bg-orange-500 text-white">{getUserInitials()}</AvatarFallback>
+                  )}
+                </Avatar>
+                */}
+                <span className="hidden md:inline-block text-sm font-medium">
+                  {user?.name || (userRole === "agent" ? "Agente" : "Compañía")}
+                </span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -156,10 +241,10 @@ export function DashboardHeader({ userRole, className = "" }: DashboardHeaderPro
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover:bg-red-100 dark:hover:bg-red-900">
+              <DropdownMenuItem className="hover:bg-red-100 dark:hover:bg-red-600">
                 <Link
                   href="/auth/login"
-                  className="w-full text-inherit hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  className="w-full text-inherit hover:text-red-600 dark:hover:text-red-600 transition-colors"
                 >
                   Cerrar sesión
                 </Link>
