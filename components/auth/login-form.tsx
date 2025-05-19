@@ -7,9 +7,10 @@ import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useAuth } from "@/contexts/auth-context"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { login } from "@/lib/api/auth"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -21,8 +22,9 @@ const formSchema = z.object({
 })
 
 export function LoginForm() {
-  const { login, isLoading } = useAuth()
   const [formError, setFormError] = React.useState<string | null>(null)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const router = useRouter()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -34,15 +36,19 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setFormError(null)
+    setIsLoading(true)
     try {
-      await login(values)
+      await login(values.email, values.password)
+      // El middleware se encarga de redirigir según el rol
+      router.push("/dashboard-company/dashboard")
     } catch (error) {
-      console.error("Login error:", error)
       if (error instanceof Error) {
         setFormError(error.message)
       } else {
         setFormError("Ocurrió un error al iniciar sesión")
       }
+    } finally {
+      setIsLoading(false)
     }
   }
 
