@@ -16,3 +16,15 @@ export async function login(email: string, password: string) {
 }
 
 // falta el logout
+export async function logout() {
+    const res = await fetch(`http://localhost:3000/api/logout`, {
+        method: "POST",
+        headers: {},
+
+        cache: "no-store",
+    });
+
+    console.log("res ", res);
+    if (!res.ok) throw new Error("No se pudo cerrar session");
+    redirect("/login");
+}

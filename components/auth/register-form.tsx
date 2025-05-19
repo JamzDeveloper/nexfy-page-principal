@@ -1,61 +1,58 @@
 "use client"
-import { useSearchParams } from "next/navigation"
-import { zodResolver } from "@hookform/resolvers/zod"
+
+import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { useAuth } from "@/contexts/auth-context"
-import type { UserRole } from "@/types/auth"
-import { useState } from "react"
+import { createUser } from "@/lib/api/users"
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Mínimo 2 caracteres",
-  }),
-  email: z.string().email({
-    message: "Email inválido",
-  }),
-  password: z.string().min(8, {
-    message: "Mínimo 8 caracteres",
-  }),
-  role: z.enum(["agent", "company"], {
-    required_error: "Selecciona un rol",
-  }),
+  firstName: z.string().min(1, { message: "El nombre es obligatorio" }),
+  lastName: z.string().min(1, { message: "El apellido es obligatorio" }),
+  email: z.string().email({ message: "Email inválido" }),
+  password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
+  role: z.enum(["agent", "company"], { required_error: "Selecciona un rol" }),
 })
 
 export function RegisterForm() {
-  const searchParams = useSearchParams()
-  const { register, isLoading } = useAuth()
   const [formError, setFormError] = useState<string | null>(null)
-
-  const defaultRole = searchParams.get("role") as UserRole | null
+  const [isLoading, setIsLoading] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
       password: "",
-      role: defaultRole || "agent",
+      role: "agent",
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setFormError(null)
+    setIsLoading(true)
     try {
-      await register(values)
-    } catch (error) {
-      // El error ya se maneja en el contexto de autenticación
-      console.error("Register error:", error)
-      if (error instanceof Error) {
-        setFormError(error.message)
-      } else {
-        setFormError("Ocurrió un error al registrarse")
-      }
+      await createUser(
+        {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          email: values.email,
+          password: values.password,
+          role: values.role,
+        },
+        "" // Pasa aquí el token si tu backend lo requiere, si no, déjalo vacío
+      )
+      // Aquí puedes redirigir o mostrar mensaje de éxito si lo deseas
+    } catch (error: any) {
+      setFormError(error.message || "Ocurrió un error al registrarse")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -69,12 +66,25 @@ export function RegisterForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
+              name="firstName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nombre</FormLabel>
                   <FormControl>
-                    <Input placeholder="Juan Pérez" {...field} />
+                    <Input placeholder="Juan" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Apellido</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Pérez" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,7 +110,7 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <Input type="password" placeholder="••••••" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,7 +138,7 @@ export function RegisterForm() {
                         <FormControl>
                           <RadioGroupItem value="company" />
                         </FormControl>
-                        <FormLabel className="font-normal">Empresa</FormLabel>
+                        <FormLabel className="font-normal">Compañía</FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>

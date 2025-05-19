@@ -30,8 +30,8 @@ export async function middleware (request:NextRequest) {
       if (response.ok) {
         const data = await response.json();
         isLoggedIn = true;
-        isCompany = data.user?.role === "Company";
-        isAgent = data.user?.role === "Agent";
+        isCompany = data.user?.role === "company";
+        isAgent = data.user?.role === "agent";
       } else if (response.status === 401) {
         // Token inválido: eliminar cookies y redirigir a login
         const res = NextResponse.redirect(new URL("/auth/login", request.url));
