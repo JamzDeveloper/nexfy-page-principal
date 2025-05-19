@@ -26,5 +26,5 @@ export async function logout() {
 
     console.log("res ", res);
     if (!res.ok) throw new Error("No se pudo cerrar session");
-    redirect("/login");
+    redirect("/auth/login");
 }

@@ -18,6 +18,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { logout } from "@/lib/api/auth"
 
 // Tipo para las notificaciones
 interface Notification {
@@ -241,13 +242,16 @@ export function DashboardHeader({ userRole, className = "" }: DashboardHeaderPro
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover:bg-red-100 dark:hover:bg-red-600">
-                <Link
-                  href="/auth/login"
-                  className="w-full text-inherit hover:text-red-600 dark:hover:text-red-600 transition-colors"
-                >
+              <DropdownMenuItem
+                className="hover:bg-red-100 dark:hover:bg-red-600"
+                onClick={async (e) => {
+                  e.preventDefault();
+                  await logout();
+                }}
+              >
+                <span className="w-full text-inherit hover:text-red-600 dark:hover:text-red-600 transition-colors">
                   Cerrar sesión
-                </Link>
+                </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
