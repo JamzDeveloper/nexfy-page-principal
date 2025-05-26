@@ -11,11 +11,11 @@ export function LandingHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full px-auto border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container mx-auto flex h-16 items-center justify-between">
         <div className="flex items-center gap-6">
           <Logo />
-          <nav className="hidden md:flex gap-6">
+          <nav className="mx-auto hidden md:flex gap-6">
             <Link href="#features" className="text-sm font-medium transition-colors hover:text-primary">
               Features
             </Link>
@@ -39,7 +39,7 @@ export function LandingHeader() {
             </Link>
             <ModeToggle />
           </div>
-          <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <Button variant="ghost" size="icon" className="md:hidden mx-4" onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
@@ -49,33 +49,33 @@ export function LandingHeader() {
           <nav className="flex flex-col gap-4">
             <Link
               href="#features"
-              className="text-sm font-medium transition-colors hover:text-primary"
+              className="text-sm pl-4 font-medium transition-colors hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
               Features
             </Link>
             <Link
               href="#testimonials"
-              className="text-sm font-medium transition-colors hover:text-primary"
+              className="text-sm pl-4 font-medium transition-colors hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
               Testimonials
             </Link>
             <Link
               href="#pricing"
-              className="text-sm font-medium transition-colors hover:text-primary"
+              className="text-sm pl-4 font-medium transition-colors hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
               Pricing
             </Link>
-            <div className="flex flex-col gap-2 pt-2">
+            <div className="flex flex-col gap-2 pt-2 px-2">
               <Link href="/auth/login" onClick={() => setIsMenuOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
+                <Button variant="ghost" size="sm" className="w-full mx-auto justify-start">
                   Log in
                 </Button>
               </Link>
               <Link href="/auth/register" onClick={() => setIsMenuOpen(false)}>
-                <Button size="sm" className="w-full justify-start">
+                <Button size="sm" className="w-full mx-auto justify-start">
                   Get Started
                 </Button>
               </Link>

@@ -7,7 +7,7 @@ interface LogoProps {
 
 export function Logo({ href = "/", className = "" }: LogoProps) {
   const LogoContent = (
-    <div className={`flex items-center space-x-2 ${className}`}>
+    <div className={`flex items-center px-4 space-x-2 ${className}`}>
       <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white font-bold rounded-lg">
         <span>N</span>
       </div>

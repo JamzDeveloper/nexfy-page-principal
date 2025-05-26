@@ -10,52 +10,53 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card, CardContent } from "@/components/ui/card"
-import { useAuth } from "@/contexts/auth-context"
 import { useState } from "react"
+import { updateUser } from "@/lib/api/users"
+
+// Utilidad para obtener cookie (puedes usar tu propia función)
+function getCookie(name: string) {
+  if (typeof document === "undefined") return "";
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()!.split(";").shift()!;
+  return "";
+}
 
 const profileFormSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  email: z.string().email({
-    message: "Please enter a valid email address.",
-  }),
-  bio: z.string().max(500, {
-    message: "Bio must not be longer than 500 characters.",
-  }),
-  title: z
-    .string()
-    .min(2, {
-      message: "Title must be at least 2 characters.",
-    })
-    .optional(),
-  location: z
-    .string()
-    .min(2, {
-      message: "Location must be at least 2 characters.",
-    })
-    .optional(),
-  expertise: z
-    .string()
-    .min(2, {
-      message: "Expertise must be at least 2 characters.",
-    })
-    .optional(),
+  firstName: z.string().min(1, { message: "El nombre es obligatorio" }),
+  lastName: z.string().min(1, { message: "El apellido es obligatorio" }),
+  email: z.string().email({ message: "Email inválido" }),
+  password: z.string().min(6, { message: "Mínimo 6 caracteres" }).optional(),
+  role: z.enum(["agent", "company"], { required_error: "Selecciona un rol" }),
+  description: z.string().optional(),
+  profileImage: z.string().optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-export function ProfileForm() {
-  const { user, updateProfile, isLoading } = useAuth()
+type ProfileFormProps = {
+  user: {
+    id: number
+    firstName: string
+    lastName: string
+    email: string
+    role: "agent" | "company"
+    description?: string
+    profileImage?: string
+  }
+}
+
+export function ProfileForm({ user }: ProfileFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formError, setFormError] = useState<string | null>(null)
 
   const defaultValues: Partial<ProfileFormValues> = {
-    name: user?.name || "",
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
     email: user?.email || "",
-    bio: user?.profile?.bio || "",
-    title: user?.profile?.title || "",
-    location: user?.profile?.location || "",
-    expertise: user?.profile?.expertise || "",
+    role: user?.role || "agent",
+    description: user?.description || "",
+    profileImage: user?.profileImage || "",
   }
 
   const form = useForm<ProfileFormValues>({
@@ -64,20 +65,26 @@ export function ProfileForm() {
   })
 
   async function onSubmit(data: ProfileFormValues) {
-    if (!user) return
-
+    setFormError(null)
     setIsSubmitting(true)
     try {
-      await updateProfile({
-        name: data.name,
-        email: data.email,
-        bio: data.bio,
-        title: data.title,
-        location: data.location,
-        expertise: data.expertise,
-      })
-    } catch (error) {
-      console.error("Error updating profile:", error)
+      const token = getCookie("session-token")
+      await updateUser(
+        user.id,
+        {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password, // solo si quieres permitir cambiarla
+          role: data.role,
+          description: data.description,
+          profileImage: data.profileImage,
+        },
+        token
+      )
+      // Aquí puedes mostrar un mensaje de éxito si lo deseas
+    } catch (error: any) {
+      setFormError(error.message || "Error al actualizar el perfil")
     } finally {
       setIsSubmitting(false)
     }
@@ -90,10 +97,12 @@ export function ProfileForm() {
           <div className="flex flex-col gap-8 md:flex-row">
             <div className="flex flex-col items-center gap-4">
               <Avatar className="h-32 w-32">
-                <AvatarImage src={user?.avatar || "/professional-headshot.png"} alt="Profile" />
-                <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase() || "U"}</AvatarFallback>
+                <AvatarImage src={user?.profileImage || "/professional-headshot.png"} alt="Profile" />
+                <AvatarFallback>
+                  {user?.firstName?.charAt(0).toUpperCase()}{user?.lastName?.charAt(0).toUpperCase()}
+                </AvatarFallback>
               </Avatar>
-              <Button variant="outline">Change Photo</Button>
+              {/* Puedes agregar aquí lógica para cambiar la foto */}
             </div>
             <div className="flex-1">
               <Form {...form}>
@@ -101,12 +110,25 @@ export function ProfileForm() {
                   <div className="grid gap-4 md:grid-cols-2">
                     <FormField
                       control={form.control}
-                      name="name"
+                      name="firstName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Name</FormLabel>
+                          <FormLabel>Nombre</FormLabel>
                           <FormControl>
-                            <Input placeholder="Your name" {...field} />
+                            <Input placeholder="Nombre" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="lastName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Apellido</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Apellido" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -119,83 +141,79 @@ export function ProfileForm() {
                         <FormItem>
                           <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <Input placeholder="Your email" {...field} />
+                            <Input placeholder="Email" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    {user?.role === "agent" && (
-                      <>
-                        <FormField
-                          control={form.control}
-                          name="title"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Title</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Your job title" {...field} value={field.value || ""} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="location"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Location</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Your location" {...field} value={field.value || ""} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="expertise"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Expertise</FormLabel>
-                              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Select your expertise" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="Enterprise Software">Enterprise Software</SelectItem>
-                                  <SelectItem value="SaaS">SaaS</SelectItem>
-                                  <SelectItem value="Healthcare">Healthcare</SelectItem>
-                                  <SelectItem value="Financial Services">Financial Services</SelectItem>
-                                  <SelectItem value="Retail">Retail</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-                    )}
+                    <FormField
+                      control={form.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rol</FormLabel>
+                          <FormControl>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Selecciona tu rol" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="agent">Agente</SelectItem>
+                                <SelectItem value="company">Compañía</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descripción</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Sobre ti o tu empresa" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="profileImage"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Imagen de perfil (URL)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="URL de la imagen" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {/* Si quieres permitir cambiar la contraseña desde aquí, descomenta esto: */}
+                    {/* 
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contraseña</FormLabel>
+                          <FormControl>
+                            <Input type="password" placeholder="Nueva contraseña" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    */}
                   </div>
-                  <FormField
-                    control={form.control}
-                    name="bio"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bio</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Tell us about yourself" className="resize-none" {...field} />
-                        </FormControl>
-                        <FormDescription>Brief description of your professional background and skills.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" disabled={isSubmitting || isLoading}>
-                    {isSubmitting ? "Updating Profile..." : "Update Profile"}
+                  {formError && <div className="text-sm font-medium text-destructive">{formError}</div>}
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Actualizando..." : "Actualizar"}
                   </Button>
                 </form>
               </Form>

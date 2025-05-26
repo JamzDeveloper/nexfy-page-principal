@@ -20,6 +20,29 @@ export interface User {
         website?: string;
     };
 }
+//fijo
+export type AgentRegisterData = {
+    user: {
+        email: string
+        password: string
+        firstName: string
+        lastName: string
+    }
+    agent: Record<string, never>
+}
+//fijo-por ver
+export type CompanyRegisterData = {
+    user: {
+        email: string
+        password: string
+        firstName: string
+        lastName: string
+    }
+    company: {
+        companyName: string
+        socialMedia: Record<string, never>
+    }
+}
 
 export interface AuthResponse {
     user: User;

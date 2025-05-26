@@ -7,53 +7,108 @@ import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createUser } from "@/lib/api/users"
+import { Eye, EyeOff } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 
-const formSchema = z.object({
-  firstName: z.string().min(1, { message: "El nombre es obligatorio" }),
-  lastName: z.string().min(1, { message: "El apellido es obligatorio" }),
-  email: z.string().email({ message: "Email inválido" }),
-  password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
-  role: z.enum(["agent", "company"], { required_error: "Selecciona un rol" }),
-})
+const formSchema = z
+  .object({
+    role: z.enum(["agent", "company"], { required_error: "Selecciona un rol" }),
+    firstName: z.string().min(1, { message: "El nombre es obligatorio" }),
+    lastName: z.string().min(1, { message: "El apellido es obligatorio" }),
+    email: z.string().email({ message: "Email inválido" }),
+    password: z.string().min(6, { message: "Mínimo 6 caracteres" }),
+    confirmPassword: z.string().min(6, { message: "Confirma tu contraseña" }),
+    companyName: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Las contraseñas no coinciden",
+    path: ["confirmPassword"],
+  })
+  .refine(
+    (data) => {
+      // Si el rol es "company", el nombre de la empresa es obligatorio
+      if (data.role === "company") {
+        return data.companyName && data.companyName.trim().length > 0
+      }
+      return true
+    },
+    {
+      message: "El nombre de la empresa es obligatorio",
+      path: ["companyName"],
+    },
+  )
 
 export function RegisterForm() {
-  const [formError, setFormError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const { registerAgent, registerCompany, isLoading } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [role, setRole] = useState<"agent" | "company">("agent")
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      role: "agent",
       firstName: "",
       lastName: "",
       email: "",
       password: "",
-      role: "agent",
+      confirmPassword: "",
+      companyName: "",
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setFormError(null)
-    setIsLoading(true)
     try {
-      await createUser(
-        {
-          firstName: values.firstName,
-          lastName: values.lastName,
-          email: values.email,
-          password: values.password,
-          role: values.role,
-        },
-        "" // Pasa aquí el token si tu backend lo requiere, si no, déjalo vacío
-      )
-      // Aquí puedes redirigir o mostrar mensaje de éxito si lo deseas
-    } catch (error: any) {
-      setFormError(error.message || "Ocurrió un error al registrarse")
-    } finally {
-      setIsLoading(false)
+      if (values.role === "agent") {
+        // Crear objeto específico para agente (sin companyName)
+        const agentData = {
+          user: {
+            email: values.email,
+            password: values.password,
+            firstName: values.firstName,
+            lastName: values.lastName
+          },
+          agent: {}
+        }
+        await registerAgent(agentData)
+      } else {
+        // Crear objeto específico para empresa (con companyName)
+        if (!values.companyName) {
+          throw new Error("El nombre de la empresa es obligatorio")
+        }
+        const companyData = {
+          user: {
+            email: values.email,
+            password: values.password,
+            firstName: values.firstName,
+            lastName: values.lastName,
+          },
+          company: {
+            companyName: values.companyName,
+            socialMedia: {}
+          },
+        }
+        await registerCompany(companyData)
+      }
+    } catch (error) {
+      // El error ya se maneja en el contexto
+      console.error("Error en registro:", error)
     }
+  }
+
+  // Sincroniza el toggle visual con el valor del formulario
+  function handleRoleChange(newRole: "agent" | "company") {
+    setRole(newRole)
+    form.setValue("role", newRole)
+
+    // Limpiar el campo companyName cuando se cambia a agent
+    if (newRole === "agent") {
+      form.setValue("companyName", "")
+    }
+
+    // Trigger validation para mostrar/ocultar errores del campo companyName
+    form.trigger("companyName")
   }
 
   return (
@@ -62,14 +117,61 @@ export function RegisterForm() {
         <CardTitle>Crear cuenta</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* TOGGLE DE ROL */}
+        <div className="relative mb-6">
+          <div className="flex bg-muted rounded-lg p-1">
+            <button
+              type="button"
+              className={`relative flex-1 py-3 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
+                role === "agent"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => handleRoleChange("agent")}
+            >
+              <span className="relative z-10">Soy Agente</span>
+            </button>
+            <button
+              type="button"
+              className={`relative flex-1 py-3 px-4 text-sm font-medium rounded-md transition-all duration-200 ${
+                role === "company"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => handleRoleChange("company")}
+            >
+              <span className="relative z-10">Soy Compañía</span>
+            </button>
+          </div>
+        </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {role === "company" && (
+              <FormField
+                control={form.control}
+                name="companyName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Nombre de empresa <span className="text-red-500">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nombre de empresa" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <FormField
               control={form.control}
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre</FormLabel>
+                  <FormLabel>
+                    Nombre <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="Juan" {...field} />
                   </FormControl>
@@ -82,7 +184,9 @@ export function RegisterForm() {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Apellido</FormLabel>
+                  <FormLabel>
+                    Apellido <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="Pérez" {...field} />
                   </FormControl>
@@ -95,7 +199,9 @@ export function RegisterForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>
+                    Email <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="tu@email.com" {...field} />
                   </FormControl>
@@ -108,9 +214,21 @@ export function RegisterForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Contraseña</FormLabel>
+                  <FormLabel>
+                    Contraseña <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••" {...field} />
+                    <div className="relative">
+                      <Input type={showPassword ? "text" : "password"} placeholder="••••••" {...field} />
+                      <button
+                        type="button"
+                        className="absolute right-2 top-2 text-gray-500"
+                        tabIndex={-1}
+                        onClick={() => setShowPassword((v) => !v)}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,35 +236,29 @@ export function RegisterForm() {
             />
             <FormField
               control={form.control}
-              name="role"
+              name="confirmPassword"
               render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Soy</FormLabel>
+                <FormItem>
+                  <FormLabel>
+                    Confirmar contraseña <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      className="flex flex-col space-y-1"
-                    >
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="agent" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Agente</FormLabel>
-                      </FormItem>
-                      <FormItem className="flex items-center space-x-3 space-y-0">
-                        <FormControl>
-                          <RadioGroupItem value="company" />
-                        </FormControl>
-                        <FormLabel className="font-normal">Compañía</FormLabel>
-                      </FormItem>
-                    </RadioGroup>
+                    <div className="relative">
+                      <Input type={showConfirm ? "text" : "password"} placeholder="••••••" {...field} />
+                      <button
+                        type="button"
+                        className="absolute right-2 top-2 text-gray-500"
+                        tabIndex={-1}
+                        onClick={() => setShowConfirm((v) => !v)}
+                      >
+                        {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {formError && <div className="text-sm font-medium text-destructive">{formError}</div>}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Creando cuenta..." : "Crear cuenta"}
             </Button>

@@ -4,13 +4,13 @@ import { DashboardHeader } from "@/components/dashboard/dashboard-header"
 import { CompanySidebar } from "@/components/dashboard/company-sidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
 
-export default function CompanyDashboardLayout({
+export default async function CompanyDashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   // Intentar obtener la preferencia de tema de la cookie
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const authCookie = cookieStore.get("auth")
   let theme = "light" // Tema por defecto para compañías
 

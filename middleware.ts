@@ -17,7 +17,7 @@ export async function middleware (request:NextRequest) {
   if (sessionToken) {
     try {
       const response = await fetch(
-        `http://localhost:3000/api/users/data-token`,
+        `http://localhost:3001/api/users/data-token`,
         {
           method: "POST",
           headers: {

@@ -16,11 +16,15 @@ export async function POST(req: Request) {
 
     console.log("resp api", data);
 
-    if (!data) {
+    if (!data || !data.token || !data.token.access_token || !data.user || !data.user.role) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const res = NextResponse.json({ success: true });
+        const res = NextResponse.json({
+        success: true,
+        user: data.user,
+        token: data.token.access_token,
+    });
 
     // Guardar cookies de sesión
     res.cookies.set("session-token", data.token.access_token, {
