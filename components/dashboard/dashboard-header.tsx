@@ -249,7 +249,7 @@ export function DashboardHeader({ userRole, className = "" }: DashboardHeaderPro
                   await logout();
                 }}
               >
-                <span className="w-full text-inherit hover:text-red-600 dark:hover:text-red-600 transition-colors">
+                <span className="w-full text-inherit hover:text-red-600 dark:hover:text-red-100 transition-colors">
                   Cerrar sesión
                 </span>
               </DropdownMenuItem>
