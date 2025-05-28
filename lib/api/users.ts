@@ -4,7 +4,7 @@ import { AgentRegisterData, CompanyRegisterData } from "@/types/auth";
 
 
 export async function fetchUsersFromAPI(token: string) {
-    const res = await fetch("http://localhost:3001/api/users", {
+    const res = await fetch(`${process.env.EXTERNAL_URL}/users`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -16,7 +16,7 @@ export async function fetchUsersFromAPI(token: string) {
 }
 
 export async function createUser(data: UserTableType, token: string) {
-    const res = await fetch("http://localhost:3001/api/users", {
+    const res = await fetch(`${process.env.EXTERNAL_URL}/users`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -35,7 +35,7 @@ export async function updateUser(
     data: Partial<UserTableType>,
     token: string
 ) {
-    const res = await fetch(`http://localhost:3001/api/users/${userId}`, {
+    const res = await fetch(`${process.env.EXTERNAL_URL}/users/${userId}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -49,7 +49,7 @@ export async function updateUser(
 }
 //agente-crear
 export async function createAgent(data: AgentRegisterData, token: string) {
-    const res = await fetch("http://localhost:3001/api/agents", {
+    const res = await fetch(`${process.env.EXTERNAL_URL}/agents`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -68,7 +68,7 @@ export async function updateAgent(
     data: Partial<AgentRegisterData>,
     token: string
 ) {
-    const res = await fetch(`http://localhost:3001/api/agents/${userId}`, {
+    const res = await fetch(`${process.env.EXTERNAL_URL}/agents/${userId}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
@@ -82,7 +82,7 @@ export async function updateAgent(
 }
 //company-crear
 export async function createCompany(data: CompanyRegisterData, token: string) {   
-    const res = await fetch("http://localhost:3001/api/companies", {
+    const res = await fetch(`${process.env.EXTERNAL_URL}/companies`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -101,7 +101,7 @@ export async function updateCompany(
     data: Partial<CompanyRegisterData>,
     token: string
 ) {
-    const res = await fetch(`http://localhost:3001/api/companies/${userId}`, {
+    const res = await fetch(`${process.env.EXTERNAL_URL}/companies/${userId}`, {
         method: "PATCH",
         headers: {
             Authorization: `Bearer ${token}`,
