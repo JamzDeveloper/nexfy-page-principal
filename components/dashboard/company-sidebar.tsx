@@ -34,11 +34,6 @@ export function CompanySidebar({ className = "" }: CompanySidebarProps) {
       href: "/dashboard-company/opportunities",
     },
     {
-      title: "Compañías",
-      icon: Building,
-      href: "/dashboard-company/companies",
-    },
-    {
       title: "Clientes",
       icon: Users,
       href: "/dashboard-company/clientes",

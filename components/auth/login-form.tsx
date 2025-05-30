@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { login } from "@/lib/api/auth"
+import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -52,7 +53,17 @@ export function LoginForm() {
     }
   }
 
+
   return (
+    <>
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="flex flex-col items-center gap-2 bg-white p-6 rounded shadow-lg">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="text-lg font-medium">Iniciando sesión...</span>
+          </div>
+        </div>
+      )}
     <Card className="w-full max-w-md">
       <CardContent>
         <Form {...form}>
@@ -91,5 +102,6 @@ export function LoginForm() {
         </Form>
       </CardContent>
     </Card>
+    </>
   )
 }
