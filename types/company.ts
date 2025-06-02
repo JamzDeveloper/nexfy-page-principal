@@ -1,9 +1,10 @@
-
 import { SocialMedia } from "./social-media.type";
 
 export interface Company {
     id: number;
-    companyName: string;
+    userId: number;
+    companyName: string;  // o name si ese es el campo que usa tu backend
+    companyLogo?: string | null;
     description?: string;
     street?: string;
     number?: string;

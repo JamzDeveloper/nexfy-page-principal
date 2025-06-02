@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
         });
 
         if (!res.ok) {
-            return NextResponse.json({ error: "Error al obtener datos del agente" }, { status: res.status });
+            return NextResponse.json({ error: "Error al obtener datos de la compañia" }, { status: res.status });
         }
 
         const data = await res.json();
@@ -28,3 +28,4 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Error en la petición" }, { status: 500 });
     }
 }
+

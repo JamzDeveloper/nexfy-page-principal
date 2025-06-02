@@ -12,6 +12,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { login } from "@/lib/api/auth"
 import { Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 const formSchema = z.object({
   email: z.string().email({
@@ -56,14 +57,26 @@ export function LoginForm() {
 
   return (
     <>
-      {isLoading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="flex flex-col items-center gap-2 bg-white p-6 rounded shadow-lg">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="text-lg font-medium">Iniciando sesión...</span>
+      <Dialog open={isLoading}>
+        <DialogContent className="sm:max-w-md" hideCloseButton>
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-center">
+              <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+              Iniciando sesión
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Verificando tus credenciales, por favor espera...
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center py-4">
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+            </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     <Card className="w-full max-w-md">
       <CardContent>
         <Form {...form}>

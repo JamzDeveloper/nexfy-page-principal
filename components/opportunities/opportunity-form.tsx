@@ -149,6 +149,13 @@ export function OpportunityForm({
 
   // Reset form when initialValues change (for edit mode)
   React.useEffect(() => {
+    if (
+      companies.length === 1 &&
+      (!form.getValues("companyId") || form.getValues("companyId") === 0)
+    ) {
+        form.setValue("companyId", companies[0].id);
+        console.log("Set companyId automáticamente:", companies[0].id);
+      }
     if (initialValues && mode === "edit") {
       form.reset({
         companyId: 0,
@@ -172,14 +179,18 @@ export function OpportunityForm({
         ...initialValues,
       });
     }
-  }, [initialValues, mode, form]);
+  }, [companies, initialValues, mode, form]);
 
   const handleSubmit = (values: OpportunityFormValues) => {
+    console.log("Valores enviados:", values);
     onSubmit(values);
     if (mode === "create") {
       form.reset();
     }
   };
+
+  console.log("Form is valid:", form.formState.isValid);
+  console.log("Form errors:", form.formState.errors);
 
   const categories = [
     "Software",
@@ -531,7 +542,9 @@ export function OpportunityForm({
                 >
                   Cancel
                 </Button>
-                <Button type="submit">{submitLabel}</Button>
+                <Button type="submit" disabled={!form.formState.isValid}>
+                  {submitLabel}
+                </Button>
               </DialogFooter>
             </form>
           </Form>
@@ -1035,80 +1048,32 @@ function CompanySearchField({
   form: UseFormReturn<OpportunityFormValues>;
   companies: Company[];
 }) {
-  const [open, setOpen] = React.useState(false);
-
-  const selectedCompany = companies?.find(
-    (company) => company.id === Number(form.getValues("companyId"))
-  );
+  const company = companies[0]; // Asumimos que solo hay una compañía disponible
+  
+  React.useEffect(() => {
+    if (company) {
+      form.setValue("companyId", company.id);
+    }
+  }, [company, form]);
 
   return (
     <FormField
       control={form.control}
       name="companyId"
-      render={({ field }) => (
+      render={() => (
         <FormItem>
-          <FormLabel>Company *</FormLabel>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <FormControl>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={open}
-                  className={cn(
-                    "w-full justify-between h-10",
-                    !field.value && "text-muted-foreground"
-                  )}
-                >
-                  {selectedCompany ? (
-                    <span className="font-medium truncate">
-                      {selectedCompany.companyName}
-                    </span>
-                  ) : (
-                    "Search and select company..."
-                  )}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </FormControl>
-            </PopoverTrigger>
-            <PopoverContent className="w-full p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search companies by name or industry..." />
-                <CommandList>
-                  <CommandEmpty>No companies found.</CommandEmpty>
-                  <CommandGroup>
-                    {companies?.map((company) => (
-                      <CommandItem
-                        key={company.id}
-                        value={`${company.companyName} ${company.industry}`}
-                        onSelect={() => {
-                          field.onChange(company.id);
-                          setOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            Number(field.value) === company.id
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {company.companyName}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {company.industry}
-                          </span>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <FormLabel>Company</FormLabel>
+          <FormControl>
+            <Input
+              value={company?.companyName || ""}
+              readOnly
+              disabled
+              className="bg-muted cursor-not-allowed"
+            />
+          </FormControl>
+          <FormDescription>
+            Your registered company will be automatically selected
+          </FormDescription>
           <FormMessage />
         </FormItem>
       )}

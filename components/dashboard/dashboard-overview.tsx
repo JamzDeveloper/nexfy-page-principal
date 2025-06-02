@@ -70,8 +70,11 @@ export function DashboardOverview({ userRole = "agent" }: DashboardOverviewProps
 
   const stats = userRole === "agent" ? agentStats : companyStats
 
+  const cols = Math.min(stats.length, 5)
+
+
   return (
-    <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-5">
+    <div className={`grid gap-5 md:grid-cols-2 lg:grid-cols-${cols}`}>
       {stats.map((stat) => (
         <Card key={stat.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
