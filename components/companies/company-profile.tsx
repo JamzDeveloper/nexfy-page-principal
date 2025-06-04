@@ -22,7 +22,7 @@ export function CompanyProfile() {
     }
 
     return (
-        <div className="max-w-4xl mx-auto">
+        // <div className="max-w-4xl mx-auto">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold">Company Profile</CardTitle>
@@ -304,6 +304,6 @@ export function CompanyProfile() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        // </div>
     )
 }

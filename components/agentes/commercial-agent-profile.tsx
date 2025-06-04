@@ -22,7 +22,7 @@ export function CommercialAgentProfile() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto">
+        // <div className="max-w-2xl mx-auto">
             <Card>
                 <CardHeader>
                     <CardTitle className="text-2xl font-bold">Commercial Agent Profile</CardTitle>
@@ -203,6 +203,6 @@ export function CommercialAgentProfile() {
                     </div>
                 </CardContent>
             </Card>
-        </div>
+        // </div>
     )
 }
