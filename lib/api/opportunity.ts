@@ -2,6 +2,7 @@ import {
     CreateOpportunityFormInput,
     OpportunityFull,
 } from "@/types/opportunity";
+import { patchFetch } from "next/dist/server/app-render/entry-base";
 
 export async function fetchOpportunityFormApi(token: string) {
     console.log("Fetching opportunities with token:", token);
@@ -103,88 +104,80 @@ export async function createOpportunityApi(
     }
 }
 
-// export async function createOpportunityApi(
-//     data: Partial<CreateOpportunityFormInput>,
-//     token: string
-// ) {
-//     //   console.log("createOpportunityApi data", data);
-//     //   const formData = new FormData();
-//     //   for (const key in data) {
-//     //     const value = data[key as keyof OpportunityFull];
+export async function updateOpportunityApi(
+    id: number,
+    data: Partial<CreateOpportunityFormInput>,
+    token: string
+) {
+    try {
+        const formData = new FormData();
 
-//     //     if (value instanceof File) {
-//     //       formData.append(key, value);
-//     //     } else if (typeof value !== "undefined" && value !== null) {
-//     //       formData.append(key, String(value));
-//     //     }
-//     //   }
-//     const formData = new FormData();
+        // Datos básicos
+        formData.append("companyId", String(data.companyId));
+        formData.append("title", data.title!);
 
-//     formData.append("company_id", String(data.companyId));
-//     formData.append("title", data.title!);
+        // Strings opcionales
+        const stringFields = [
+            "targetIndustry",
+            "currency",
+            "country",
+            "city",
+            "targetAudience",
+            "contentDescription",
+            "pricingStructureNotes",
+            "salesCycleEstimation"
+        ];
+        stringFields.forEach(field => {
+            if (data[field as keyof typeof data]) {
+                formData.append(field, String(data[field as keyof typeof data]));
+            }
+        });
 
-//     if (data.targetIndustry)
-//         formData.append("targetIndustry", data.targetIndustry);
-//     if (data.currency) formData.append("currency", data.currency);
-//     if (data.country) formData.append("country", data.country);
-//     if (data.city) formData.append("city", data.city);
-//     if (data.targetAudience)
-//         formData.append("targetAudience", data.targetAudience);
-//     if (data.averageDealValue !== undefined)
-//         formData.append("averageDealValue", String(data.averageDealValue));
-//     if (data.commissionPercentage !== undefined)
-//         formData.append("commissionPercentage", String(data.commissionPercentage));
-//     if (data.deliverLeads !== undefined)
-//         formData.append("deliverLeads", String(data.deliverLeads));
-//     if (data.salesCycleEstimation)
-//         formData.append("salesCycleEstimation", data.salesCycleEstimation);
-//     if (data.contentDescription)
-//         formData.append("contentDescription", data.contentDescription);
-//     if (data.pricingStructureNotes)
-//         formData.append("pricingStructureNotes", data.pricingStructureNotes);
+        // Números
+        const numberFields = ["averageDealValue", "commissionPercentage"];
+        numberFields.forEach(field => {
+            if (data[field as keyof typeof data] !== undefined) {
+                formData.append(field, String(data[field as keyof typeof data]));
+            }
+        });
 
-//     // Arrays (como stringificado JSON)
-//     if (data.languages?.length) {
-//         formData.append("languages", JSON.stringify(data.languages));
-//     }
+        // Booleanos
+        if (data.deliverLeads !== undefined) {
+            formData.append("deliverLeads", String(data.deliverLeads));
+        }
 
-//     if (data.qa?.length) {
-//         formData.append("qa", JSON.stringify(data.qa));
-//     }
+        // Arrays como JSON
+        const arrayFields = ["languages", "qa", "videoLinks"];
+        arrayFields.forEach(field => {
+            const value = data[field as keyof typeof data];
+            if (value && Array.isArray(value) && value.length > 0) {
+                formData.append(field, JSON.stringify(value));
+            }
+        });
 
-//     if (data.videoLinks?.length) {
-//         formData.append("videoLinks", JSON.stringify(data.videoLinks));
-//     }
+        // Archivos
+        if (data.documents?.length) {
+            data.documents.forEach(doc => formData.append("documents", doc));
+        }
+        if (data.images?.length) {
+            data.images.forEach(img => formData.append("images", img));
+        }
 
-//     // Archivos
-//     if (data.documents?.length) {
-//         data.documents.forEach((doc) => formData.append("documents", doc));
-//     }
+        const response = await fetch(`/api/opportunities/${id}`, {
+            method: "PATCH",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+        });
 
-//     if (data.images?.length) {
-//         data.images.forEach((img) => formData.append("images", img));
-//     }
+        if (!response.ok) {
+            throw new Error("Error actuali opportunity");
+        }
 
-//     //   for (const [key, value] of formData.entries()) {
-//     //     console.log(`${key}:`, value);
-//     //   }
-//     try {
-//         const response = await fetch(`${process.env.API_URL}/opportunities`, {
-//             method: "POST",
-//             headers: {
-//                 Authorization: `Bearer ${token}`,
-//             },
-//             body: formData,
-//         });
-
-//         if (!response.ok) {
-//             const error = await response.json();
-//             throw new Error(error.message || "Error creating opportunity");
-//         }
-
-//         return await response.json();
-//     } catch (error) {
-//         console.error("Error in createOpportunityApi:", error);
-//         throw error;
-//     }
-// }
+        return await response.json();
+    } catch (error) {
+        console.error("Error in updateOpportunityApi:", error);
+        throw error;
+    }
+}

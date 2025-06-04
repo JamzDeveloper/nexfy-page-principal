@@ -1,12 +1,9 @@
-import { ProfileForm } from "@/components/profile/profile-form"
+import { CommercialAgentProfile } from "@/components/agentes/commercial-agent-profile"
 
-export default function AgentProfilePage() {
+export default function Home() {
     return (
-        <div className="container py-6 space-y-6">
-            <div className="flex justify-between items-center">
-                <h1 className="text-3xl font-bold tracking-tight">Mi Perfil</h1>
-            </div>
-            <ProfileForm />
-        </div>
+        <main className="container mx-auto py-10 px-4">
+            <CommercialAgentProfile />
+        </main>
     )
 }

@@ -63,7 +63,7 @@ import {
     CreateOpportunityFormInput,
     OpportunityFull,
 } from "@/types/opportunity";
-import { createOpportunityApi } from "@/lib/api/opportunity";
+import { createOpportunityApi, updateOpportunityApi } from "@/lib/api/opportunity";
 import { toast } from "../ui/use-toast";
 
 // const data: OpportunityFull[] = [
@@ -354,34 +354,82 @@ export function OpportunitiesTable({
     }
 
     // Handle form submission for editing an opportunity
-    function onEditSubmit(values: OpportunityFormValues) {
-        if (!selectedOpportunity) return;
+// Handle form submission for editing an opportunity
+async function onEditSubmit(values: OpportunityFormValues) {
+    if (!selectedOpportunity) return;
 
-        // Update the opportunity with the form values
-        const updatedOpportunities = opportunities.map((opportunity) => {
-            if (opportunity.id === selectedOpportunity.id) {
-                return {
-                    ...opportunity,
-                    title: values.title,
-                    companyId: values.companyId,
-                    targetIndustry: values.targetIndustry || "Other",
-                    commissionPercentage: values.commissionPercentage
-                        ? values.commissionPercentage
-                        : 0,
-                    contentDescription: values.contentDescription,
-                    pricingStructureNotes: values.pricingStructureNotes || "",
-                };
-            }
-            return opportunity;
+    // VALIDACIÓN CRÍTICA: Asegúrate de que companyId sea válido
+    if (!values.companyId || isNaN(Number(values.companyId))) {
+        toast({
+            title: "Error",
+            description: "Debes seleccionar una compañía válida.",
+            variant: "destructive",
         });
+        return;
+    }
 
-        // Update the opportunities array
-        setOpportunities(updatedOpportunities);
+    try {
+        // Prepara los datos igual que en onCreateSubmit
+        const opportunityData: Partial<CreateOpportunityFormInput> = {
+            companyId: Number(values.companyId), // Convierte SIEMPRE a número
+            title: values.title,
+            ...(values.targetIndustry && { targetIndustry: values.targetIndustry }),
+            ...(values.languages && values.languages.length > 0 && { languages: values.languages }),
+            ...(values.currency && { currency: values.currency }),
+            ...(values.country && { country: values.country }),
+            ...(values.city && { city: values.city }),
+            ...(values.targetAudience && { targetAudience: values.targetAudience }),
+            ...(values.contentDescription && { contentDescription: values.contentDescription }),
+            ...(values.averageDealValue !== undefined && { averageDealValue: values.averageDealValue }),
+            ...(values.pricingStructureNotes && { pricingStructureNotes: values.pricingStructureNotes }),
+            ...(values.commissionPercentage !== undefined && { commissionPercentage: values.commissionPercentage }),
+            ...(values.deliverLeads !== undefined && { deliverLeads: values.deliverLeads }),
+            ...(values.salesCycleEstimation && { salesCycleEstimation: values.salesCycleEstimation }),
+            ...(values.qa && values.qa.length > 0 && { qa: values.qa }),
+            ...(values.videoLinks && values.videoLinks.length > 0 && { videoLinks: values.videoLinks }),
+            ...(values.documents && values.documents.length > 0 && { documents: values.documents }),
+            ...(values.images && values.images.length > 0 && { images: values.images }),
+        };
 
-        // Close the dialog and reset the form
+        // Log para debug - revisa qué estás enviando
+        console.log("Sending update data:", opportunityData);
+        console.log("CompanyId type:", typeof opportunityData.companyId);
+
+        const result = await updateOpportunityApi(selectedOpportunity.id!, opportunityData, token);
+
+        if (result) {
+            // Actualiza el estado local solo si la API responde bien
+            const updatedOpportunities = opportunities.map((opportunity) => {
+                if (opportunity.id === selectedOpportunity.id) {
+                    return { ...opportunity, ...opportunityData };
+                }
+                return opportunity;
+            });
+            setOpportunities(updatedOpportunities);
+
+            toast({
+                title: "Actualización exitosa",
+                description: "La oportunidad fue actualizada correctamente.",
+            });
+        } else {
+            toast({
+                title: "Error",
+                description: "No se pudo actualizar la oportunidad.",
+                variant: "destructive",
+            });
+        }
+    } catch (error) {
+        console.error("Error updating opportunity:", error);
+        toast({
+            title: "Error",
+            description: "Error actualizando oportunidad: " + (error as Error).message,
+            variant: "destructive",
+        });
+    } finally {
         setIsEditDialogOpen(false);
         setSelectedOpportunity(null);
     }
+}
 
     // Handle opening the edit dialog
     const handleEdit = (opportunity: OpportunityFull) => {
@@ -411,30 +459,31 @@ export function OpportunitiesTable({
     };
 
     // Prepare initial values for edit form
-    const getEditInitialValues = (
-        opportunity: OpportunityFull
-    ): Partial<OpportunityFormValues> => {
-        return {
-            companyId: Number(opportunity.company),
-            title: opportunity.title,
-            targetIndustry: opportunity.targetIndustry,
-            languages: [],
-            currency: "USD",
-            country: "",
-            city: "",
-            targetAudience: "",
-            contentDescription: opportunity.contentDescription || "",
-            averageDealValue: 0,
-            pricingStructureNotes: opportunity.pricingStructureNotes || "",
-            commissionPercentage: Number(opportunity.commissionPercentage) || 0,
-            deliverLeads: false,
-            salesCycleEstimation: "",
-            qa: [],
-            videoLinks: [],
-            documents: [],
-            images: [],
-        };
+// Prepare initial values for edit form
+const getEditInitialValues = (
+    opportunity: OpportunityFull
+): Partial<OpportunityFormValues> => {
+    return {
+        companyId: typeof opportunity.company?.id === "number" ? opportunity.company.id : companies[0]?.id,
+        title: opportunity.title,
+        targetIndustry: opportunity.targetIndustry,
+        languages: [],
+        currency: "USD",
+        country: "",
+        city: "",
+        targetAudience: "",
+        contentDescription: opportunity.contentDescription || "",
+        averageDealValue: 0,
+        pricingStructureNotes: opportunity.pricingStructureNotes || "",
+        commissionPercentage: Number(opportunity.commissionPercentage) || 0,
+        deliverLeads: false,
+        salesCycleEstimation: "",
+        qa: [],
+        videoLinks: [],
+        documents: [],
+        images: [],
     };
+};
 
     // Handle opening the applicationsCount dialog
     const handleViewApplications = (opportunity: OpportunityFull) => {
