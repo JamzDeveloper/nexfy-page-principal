@@ -1,3 +1,4 @@
+//// filepath: c:\Users\Alexc\Desktop\nexfy\nexfy-app\components\opportunities\opportunities-view-dialog.tsx
 "use client"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,19 +13,6 @@ import {
 import { FileText } from "lucide-react"
 import { OpportunityFull } from "@/types/opportunity"
 
-// type Opportunity = {
-//   id: string
-//   title: string
-//   company: string
-//   targetIndustry: string
-//   commission: string
-//   // status: "active" | "closed" | "draft"
-//   applications: number
-//   createdAt: string
-//   description?: string
-//   requirements?: string
-// }
-
 interface OpportunityViewDialogProps {
     open: boolean
     onOpenChange: (open: boolean) => void
@@ -32,7 +20,12 @@ interface OpportunityViewDialogProps {
     onEdit: (opportunity: OpportunityFull) => void
 }
 
-export function OpportunityViewDialog({ open, onOpenChange, opportunity, onEdit }: OpportunityViewDialogProps) {
+export function OpportunityViewDialog({
+    open,
+    onOpenChange,
+    opportunity,
+    onEdit,
+}: OpportunityViewDialogProps) {
     if (!opportunity) return null
 
     return (
@@ -48,52 +41,56 @@ export function OpportunityViewDialog({ open, onOpenChange, opportunity, onEdit 
 
                     <div className="flex-1 overflow-y-auto px-4 py-4">
                         <div className="space-y-6">
+                            {/* Mostrar estado o badges */}
                             <div className="flex flex-wrap gap-2">
-                                {/* <Badge
-                  variant={
-                    opportunity.status === "active"
-                      ? "default"
-                      : opportunity.status === "closed"
-                        ? "secondary"
-                        : "outline"
-                  }
-                >
-                  {opportunity.status}
-                </Badge> */}
-                                <Badge variant="outline">{opportunity.commissionPercentage} Commission</Badge>
-                                <Badge variant="outline">{opportunity.applicationsCount} Applications</Badge>
+                                <Badge variant="outline">
+                                    {opportunity.commissionPercentage || 0}% Commission
+                                </Badge>
+                                <Badge variant="outline">
+                                    {opportunity.applicationsCount || 0} Applications
+                                </Badge>
                             </div>
 
                             {/* Basic Information */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Basic Information</h4>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Basic Information
+                                </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-3">
                                         <div>
                                             <span className="text-sm font-medium">Company:</span>
-                                            <p className="text-sm text-muted-foreground">{opportunity.company?.companyName}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.company?.companyName}
+                                            </p>
                                         </div>
                                         <div>
                                             <span className="text-sm font-medium">Title:</span>
-                                            <p className="text-sm text-muted-foreground">{opportunity.title}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.title}
+                                            </p>
                                         </div>
                                         <div>
                                             <span className="text-sm font-medium">Category:</span>
-                                            <p className="text-sm text-muted-foreground">{opportunity.targetIndustry}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.targetIndustry}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="space-y-3">
                                         <div>
-                                            <span className="text-sm font-medium">Commission Rate:</span>
-                                            <p className="text-sm text-muted-foreground">{opportunity.commissionPercentage}</p>
+                                            <span className="text-sm font-medium">
+                                                Commission Rate:
+                                            </span>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.commissionPercentage || 0}%
+                                            </p>
                                         </div>
-                                        {/* <div>
-                      <span className="text-sm font-medium">Status:</span>
-                      <p className="text-sm text-muted-foreground capitalize">{opportunity.status}</p>
-                    </div> */}
                                         <div>
                                             <span className="text-sm font-medium">Applications:</span>
-                                            <p className="text-sm text-muted-foreground">{opportunity.applicationsCount}</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.applicationsCount || 0}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -101,32 +98,50 @@ export function OpportunityViewDialog({ open, onOpenChange, opportunity, onEdit 
 
                             {/* Content Description */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Content Description</h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed">{opportunity.contentDescription}</p>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Content Description
+                                </h4>
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                    {opportunity.contentDescription || "N/A"}
+                                </p>
                             </div>
 
                             {/* Target Information */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Target Information</h4>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Target Information
+                                </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-3">
                                         <div>
-                                            <span className="text-sm font-medium">Target Industry:</span>
-                                            <p className="text-sm text-muted-foreground">{opportunity.targetIndustry}</p>
+                                            <span className="text-sm font-medium">
+                                                Target Industry:
+                                            </span>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.targetIndustry || "N/A"}
+                                            </p>
                                         </div>
                                         <div>
-                                            <span className="text-sm font-medium">Target Audience:</span>
-                                            <p className="text-sm text-muted-foreground">Enterprise clients, Fortune 500 companies</p>
+                                            <span className="text-sm font-medium">
+                                                Target Audience:
+                                            </span>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.targetAudience || "N/A"}
+                                            </p>
                                         </div>
                                     </div>
                                     <div className="space-y-3">
                                         <div>
                                             <span className="text-sm font-medium">Country:</span>
-                                            <p className="text-sm text-muted-foreground">United States</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.country || "N/A"}
+                                            </p>
                                         </div>
                                         <div>
                                             <span className="text-sm font-medium">City:</span>
-                                            <p className="text-sm text-muted-foreground">New York, Los Angeles, Chicago</p>
+                                            <p className="text-sm text-muted-foreground">
+                                                {opportunity.city || "N/A"}
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
@@ -134,175 +149,198 @@ export function OpportunityViewDialog({ open, onOpenChange, opportunity, onEdit 
 
                             {/* Languages */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Languages</h4>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Languages
+                                </h4>
                                 <div className="flex flex-wrap gap-2">
-                                    <Badge variant="secondary" className="text-xs">
-                                        English
-                                    </Badge>
-                                    <Badge variant="secondary" className="text-xs">
-                                        Spanish
-                                    </Badge>
-                                    <Badge variant="secondary" className="text-xs">
-                                        French
-                                    </Badge>
+                                    {opportunity.languages && opportunity.languages.length > 0 ? (
+                                        opportunity.languages.map((lang, idx) => (
+                                            <Badge key={idx} variant="secondary" className="text-xs">
+                                                {lang}
+                                            </Badge>
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">
+                                            No languages
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
                             {/* Financial Information */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Financial Information</h4>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Financial Information
+                                </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
                                         <span className="text-sm font-medium">Currency:</span>
-                                        <p className="text-sm text-muted-foreground">USD</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {opportunity.currency || "N/A"}
+                                        </p>
                                     </div>
                                     <div>
-                                        <span className="text-sm font-medium">Average Deal Value:</span>
-                                        <p className="text-sm text-muted-foreground">$50,000</p>
+                                        <span className="text-sm font-medium">
+                                            Average Deal Value:
+                                        </span>
+                                        <p className="text-sm text-muted-foreground">
+                                            {opportunity.averageDealValue
+                                                ? `$${opportunity.averageDealValue}`
+                                                : "N/A"}
+                                        </p>
                                     </div>
                                     <div>
-                                        <span className="text-sm font-medium">Commission Percentage:</span>
-                                        <p className="text-sm text-muted-foreground">{opportunity.commissionPercentage}</p>
+                                        <span className="text-sm font-medium">
+                                            Commission Percentage:
+                                        </span>
+                                        <p className="text-sm text-muted-foreground">
+                                            {opportunity.commissionPercentage || 0}%
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="mt-4">
-                                    <span className="text-sm font-medium">Pricing Structure Notes:</span>
-                                    <p className="text-sm text-muted-foreground mt-1">{opportunity.pricingStructureNotes}</p>
+                                    <span className="text-sm font-medium">
+                                        Pricing Structure Notes:
+                                    </span>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        {opportunity.pricingStructureNotes || "N/A"}
+                                    </p>
                                 </div>
                             </div>
 
                             {/* Sales Information */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Sales Information</h4>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Sales Information
+                                </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <span className="text-sm font-medium">Sales Cycle Estimation:</span>
-                                        <p className="text-sm text-muted-foreground">3-6 months</p>
+                                        <span className="text-sm font-medium">
+                                            Sales Cycle Estimation:
+                                        </span>
+                                        <p className="text-sm text-muted-foreground">
+                                            {opportunity.salesCycleEstimation || "N/A"}
+                                        </p>
                                     </div>
                                     <div>
                                         <span className="text-sm font-medium">Deliver Leads:</span>
-                                        <p className="text-sm text-muted-foreground">Yes</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {opportunity.deliverLeads ? "Yes" : "No"}
+                                        </p>
                                     </div>
                                 </div>
                             </div>
 
                             {/* Q&A Section */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Q&A Section</h4>
-                                <div className="space-y-3">
-                                    <div className="border rounded-lg p-4">
-                                        <h5 className="text-sm font-medium mb-2">What is the typical sales cycle?</h5>
-                                        <p className="text-sm text-muted-foreground">
-                                            The average sales cycle ranges from 3-6 months depending on the client size and complexity of the
-                                            solution.
-                                        </p>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Q&A Section
+                                </h4>
+                                {opportunity.qa && opportunity.qa.length > 0 ? (
+                                    <div className="space-y-3">
+                                        {opportunity.qa.map((item, idx) => (
+                                            <div key={idx} className="border rounded-lg p-4">
+                                                <h5 className="text-sm font-medium mb-2">
+                                                    {item.question}
+                                                </h5>
+                                                <p className="text-sm text-muted-foreground">
+                                                    {item.answer}
+                                                </p>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="border rounded-lg p-4">
-                                        <h5 className="text-sm font-medium mb-2">Do you provide marketing materials?</h5>
-                                        <p className="text-sm text-muted-foreground">
-                                            Yes, we provide comprehensive marketing materials including brochures, case studies, and demo
-                                            videos.
-                                        </p>
-                                    </div>
-                                    <div className="border rounded-lg p-4">
-                                        <h5 className="text-sm font-medium mb-2">What support do you offer to sales agents?</h5>
-                                        <p className="text-sm text-muted-foreground">
-                                            We provide 24/7 technical support, regular training sessions, and dedicated account managers for
-                                            all our sales partners.
-                                        </p>
-                                    </div>
-                                </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        No Q&A items found.
+                                    </p>
+                                )}
                             </div>
 
                             {/* Video Links */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Training Videos</h4>
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                                        <div className="h-6 w-6 bg-red-500 rounded-sm flex items-center justify-center">
-                                            <span className="text-white text-xs">▶</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium">Product Demo Training</p>
-                                            <p className="text-xs text-muted-foreground">https://youtube.com/watch?v=demo1</p>
-                                        </div>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Training Videos
+                                </h4>
+                                {opportunity.videoLinks && opportunity.videoLinks.length > 0 ? (
+                                    <div className="space-y-2">
+                                        {opportunity.videoLinks.map((link, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="flex items-center gap-3 p-3 border rounded-lg"
+                                            >
+                                                <div className="h-6 w-6 bg-red-500 rounded-sm flex items-center justify-center">
+                                                    <span className="text-white text-xs">▶</span>
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-medium">Video #{idx + 1}</p>
+                                                    <p className="text-xs text-muted-foreground">{link}</p>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                                        <div className="h-6 w-6 bg-red-500 rounded-sm flex items-center justify-center">
-                                            <span className="text-white text-xs">▶</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium">Sales Techniques Masterclass</p>
-                                            <p className="text-xs text-muted-foreground">https://youtube.com/watch?v=sales101</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                                        <div className="h-6 w-6 bg-red-500 rounded-sm flex items-center justify-center">
-                                            <span className="text-white text-xs">▶</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-medium">Customer Success Stories</p>
-                                            <p className="text-xs text-muted-foreground">https://vimeo.com/success-stories</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">No videos</p>
+                                )}
                             </div>
 
                             {/* Documents */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Documents</h4>
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                                        <FileText className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                            <p className="text-sm font-medium">Product Brochure.pdf</p>
-                                            <p className="text-xs text-muted-foreground">2.4 MB</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 p-3 border rounded-lg">
-                                        <FileText className="h-5 w-5 text-blue-500" />
-                                        <div>
-                                            <p className="text-sm font-medium">Sales Playbook.docx</p>
-                                            <p className="text-xs text-muted-foreground">1.8 MB</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Documents
+                                </h4>
+                                {opportunity.assets?.filter((a) => a.type === "document")
+                                    .length ? (
+                                    opportunity.assets
+                                        ?.filter((a) => a.type === "document")
+                                        .map((doc) => (
+                                            <div
+                                                className="flex items-center gap-3 p-3 border rounded-lg mb-2"
+                                                key={doc.id}
+                                            >
+                                                <FileText className="h-5 w-5 text-blue-500" />
+                                                <div>
+                                                    <p className="text-sm font-medium">
+                                                        {doc.originalFilename || "Documento"}
+                                                    </p>
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {doc.description || doc.s3Key}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">
+                                        No documents
+                                    </p>
+                                )}
                             </div>
 
                             {/* Images */}
                             <div>
-                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">Images</h4>
+                                <h4 className="text-lg font-semibold border-b pb-2 mb-4">
+                                    Images
+                                </h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div className="relative group">
-                                        <div className="aspect-video rounded-lg overflow-hidden border">
-                                            <img
-                                                src="/placeholder.svg?height=200&width=300&query=product dashboard interface"
-                                                alt="Product Dashboard"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-2">Product Dashboard Interface</p>
-                                    </div>
-                                    <div className="relative group">
-                                        <div className="aspect-video rounded-lg overflow-hidden border">
-                                            <img
-                                                src="/placeholder.svg?height=200&width=300&query=sales team meeting"
-                                                alt="Sales Team"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-2">Sales Team Training</p>
-                                    </div>
-                                    <div className="relative group">
-                                        <div className="aspect-video rounded-lg overflow-hidden border">
-                                            <img
-                                                src="/placeholder.svg?height=200&width=300&query=customer success chart"
-                                                alt="Success Metrics"
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-2">Customer Success Metrics</p>
-                                    </div>
+                                    {opportunity.assets?.filter((a) => a.type === "image").length ? (
+                                        opportunity.assets
+                                            .filter((a) => a.type === "image")
+                                            .map((img) => (
+                                                <div className="relative group" key={img.id}>
+                                                    <div className="aspect-video rounded-lg overflow-hidden border">
+                                                        <img
+                                                            src={img.url}
+                                                            alt={img.description || "Image"}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground mt-2">
+                                                        {img.description || "Image"}
+                                                    </p>
+                                                </div>
+                                            ))
+                                    ) : (
+                                        <p className="text-sm text-muted-foreground">No images</p>
+                                    )}
                                 </div>
                             </div>
 

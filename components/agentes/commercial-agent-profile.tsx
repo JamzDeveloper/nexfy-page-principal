@@ -30,7 +30,7 @@ export function CommercialAgentProfile() {
                 <CardContent className="space-y-6">
                     {/* User Information Section */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Personal Information</h3>
+                        <h3 className="text-lg font-semibold">Personal Information</h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -61,7 +61,7 @@ export function CommercialAgentProfile() {
 
                     {/* Professional Information Section */}
                     <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">Professional Information</h3>
+                        <h3 className="text-lg font-semibold">Professional Information</h3>
 
                         <div>
                             <Label htmlFor="profile-image">Profile Image</Label>
@@ -199,7 +199,7 @@ export function CommercialAgentProfile() {
                     <Separator />
 
                     <div className="flex justify-end">
-                        <Button className="bg-blue-500 hover:bg-blue-600 px-8">Save Profile</Button>
+                        <Button className="bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-black dark:hover:bg-slate-300 px-8">Save Profile</Button>
                     </div>
                 </CardContent>
             </Card>
